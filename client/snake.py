@@ -3,6 +3,17 @@ import time
 
 textures = [
     'default',
+    'blue',
+    'cyan',
+    'darkgreen',
+    'green',
+    'magenta',
+    'orange',
+    'pink',
+    'purple',
+    'red',
+    'white',
+    'yellow'
 ]
 
 class Action():
@@ -13,9 +24,10 @@ class Action():
         self.completed_indices = []
 
 class GenericSnakeComponent(Entity):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._direction = (0, 0)
+        self.texture_color = textures[0]
 
     @property
     def direction(self):
@@ -35,8 +47,8 @@ class Snake(GenericSnakeComponent):
     def __init__(self):
         super().__init__()
         self.model='assets/snakes/head.obj'
+        self.texture = 'assets/snakes/default/head.png'
         self.collider = 'box'
-        self.textureColor = textures[0]
         self.direction = (0, 0)
         self.position = (0, 0.5, 0)
         self.speed = 5                  # speed in units/s
@@ -120,6 +132,7 @@ class SnakeBodyComponent(GenericSnakeComponent):
     def __init__(self, direction, parent, tail = True, activation_time = time.time()):
         super().__init__()
         self.tail = tail
+        self.texture = 'assets/snakes/default/skin.jpg'
         self.collider = 'box'
         self.direction = direction
         self.activation_time = activation_time
