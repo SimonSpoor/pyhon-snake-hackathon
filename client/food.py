@@ -10,6 +10,6 @@ class Apple(Entity):
         self.relocate_apple()
 
     def relocate_apple(self):
-        coords = (random.random() * 18 - 9, random.random() * 18 - 9)
+        coords = (random.random() * 44 - 22, random.random() * 20 - 10)
         self.position = (coords[0], self.model_bounds.y / 2, coords[1])
         print(coords)

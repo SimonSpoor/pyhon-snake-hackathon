@@ -47,20 +47,33 @@ class GenericSnakeComponent(Entity):
         self.rotation = rotation
 
 class Snake(GenericSnakeComponent):
-    def __init__(self):
+    def __init__(self, parent):
         super().__init__()
         self.model='assets/snakes/head.obj'
         self.texture = 'assets/snakes/default/head.png'
         self.collider = 'box'
         self.direction = (0, 0)
         self.position = (0, self.model_bounds.y / 2, 0)
-        self.speed = 10                  # speed in units/s
         self.children = []
         self.actions = []
+        self.__parent = parent
+
+    @property
+    def speed(self):
+        return 5 + self.length / 3
 
     @property
     def velocity(self):
         return tuple(d * self.speed for d in self.direction)
+
+    def death(self):
+        destroy(self)
+        btn = None
+        def play_again():
+            destroy(btn)
+            self.__parent.loadSingleplayerGame()
+
+        btn = Button('Play again?', position=(0,0), on_click=play_again)
 
     def input(self, key):
         old_direction = self.direction
@@ -93,21 +106,16 @@ class Snake(GenericSnakeComponent):
         rightWall = Entity(model = 'quad', visible = False, scale = Vec3(1, 1, 50), position = (22, 0, 0), collider = 'box')
         for child in self.children[1:]:
             if (self.intersects(child)).hit and child.is_active:
-                print("Hit")
-                destroy(self)
+                self.death()
                 return
         if(self.intersects(ceiling)).hit:
-            print("Hit")
-            destroy(self)
+            self.death()
         if(self.intersects(floor)).hit:
-            print("Hit")
-            destroy(self)
+            self.death()
         if(self.intersects(leftWall)).hit:
-            print("Hit")
-            destroy(self)
+            self.death()
         if(self.intersects(rightWall)).hit:
-            print("Hit")
-            destroy(self)
+            self.death()
         if(self.intersects(food)).hit:
             food.relocate_apple()
             self.grow_snake()
