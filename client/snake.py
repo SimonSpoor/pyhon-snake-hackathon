@@ -49,14 +49,18 @@ class GenericSnakeComponent(Entity):
 class Snake(GenericSnakeComponent):
     def __init__(self, parent):
         super().__init__()
+        self.skin='default'
         self.model='assets/snakes/head.obj'
-        self.texture = 'assets/snakes/default/head.png'
+        self.set_texture()
         self.collider = 'box'
         self.direction = (0, 0)
         self.position = (0, self.model_bounds.y / 2, 0)
         self.children = []
         self.actions = []
         self.__parent = parent
+
+    def set_texture(self):
+        return 'assets/snakes/{0}/head.png'.format(self.skin)
 
     @property
     def speed(self):
@@ -76,15 +80,20 @@ class Snake(GenericSnakeComponent):
         btn = Button('Play again?', position=(0,0), on_click=play_again)
 
     def input(self, key):
+        print(key)
         old_direction = self.direction
-        if key == 'w' or key == "up_arrow":
+        if key == 'w' or key == "up arrow":
             self.direction = (0, -1)
-        if key == 'a' or key == "left_arrow":
+        if key == 'a' or key == "left arrow":
             self.direction = (1, 0)
-        if key == 's' or key == "down_arrow":
+        if key == 's' or key == "down arrow":
             self.direction = (0, 1)
-        if key == 'd' or key == "right_arrow":
+        if key == 'd' or key == "right arrow":
             self.direction = (-1, 0)
+
+        if(key.isnumeric()):
+            self.skin = textures[int(key)]
+            self.set_texture()
 
         if(old_direction[0] == -self.direction[0] or old_direction[1] == -self.direction[1] and not old_direction == (0, 0)):
             self.direction = old_direction
@@ -162,12 +171,15 @@ class SnakeBodyComponent(GenericSnakeComponent):
     def __init__(self, direction, parent, tail = True, activation_time = time.time()):
         super().__init__()
         self.tail = tail
-        self.texture = 'assets/snakes/default/skin.jpg'
         self.collider = 'box'
         self.direction = direction
         self.activation_time = activation_time
         self.is_active = False
         self._parent = parent
+        self.set_texture()
+        
+    def set_texture(self):
+        return 'assets/snakes/{0}/skin.png'.format(self._parent.skin)
 
     @property
     def tail(self):
