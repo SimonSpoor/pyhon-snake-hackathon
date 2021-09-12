@@ -60,7 +60,7 @@ class Snake(GenericSnakeComponent):
         self.__parent = parent
 
     def set_texture(self):
-        return 'assets/snakes/{0}/head.png'.format(self.skin)
+        self.texture = 'assets/snakes/{0}/head.png'.format(self.skin)
 
     @property
     def speed(self):
@@ -94,6 +94,8 @@ class Snake(GenericSnakeComponent):
         if(key.isnumeric()):
             self.skin = textures[int(key)]
             self.set_texture()
+            for child in self.children:
+                child.set_texture()
 
         if(old_direction[0] == -self.direction[0] or old_direction[1] == -self.direction[1] and not old_direction == (0, 0)):
             self.direction = old_direction
@@ -171,15 +173,15 @@ class SnakeBodyComponent(GenericSnakeComponent):
     def __init__(self, direction, parent, tail = True, activation_time = time.time()):
         super().__init__()
         self.tail = tail
+        self._parent = parent
+        self.set_texture()
         self.collider = 'box'
         self.direction = direction
         self.activation_time = activation_time
         self.is_active = False
-        self._parent = parent
-        self.set_texture()
         
     def set_texture(self):
-        return 'assets/snakes/{0}/skin.png'.format(self._parent.skin)
+        self.texture = 'assets/snakes/{0}/skin.jpg'.format(self._parent.skin)
 
     @property
     def tail(self):
@@ -190,7 +192,7 @@ class SnakeBodyComponent(GenericSnakeComponent):
         if value:
             self.model = 'assets/snakes/tail.obj'
         else:
-            self.model='assets/snakes/segment.obj'
+            self.model = 'assets/snakes/segment.obj'
 
     @property
     def velocity(self):
