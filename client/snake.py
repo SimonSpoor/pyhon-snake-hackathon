@@ -1,6 +1,10 @@
 from ursina import *
 import time
 
+textures = [
+    'default',
+]
+
 class Action():
     def __init__(self, direction, position):
         self.direction = direction
@@ -8,35 +12,31 @@ class Action():
         self.time = time.time()
         self.completed_indices = []
 
-class SnakeComponent(Entity):
-    def __init__(self, direction, parent, activation_time = time.time()):
-        super().__init__()
-        self.model='cube'
-        self.collider = 'box'
-        self.direction = direction
-        self.activation_time = activation_time
-        self.is_active = False
-        self._parent = parent
-
-    @property
-    def velocity(self):
-        return tuple(d * self._parent.speed for d in self.direction)
-
-    def update(self):
-        if(self.is_active):
-            self.x += self.velocity[0] * time.dt
-            self.z += self.velocity[1] * time.dt
-    
-    def perform_action(self, action):
-        self.direction = action.direction
-        self.position = action.position
-
-class Snake(Entity):
+class GenericSnakeComponent(Entity):
     def __init__(self):
         super().__init__()
-        self.model='cube'
+        self._direction = (0, 0)
+
+    @property
+    def direction(self):
+        return self._direction
+
+    @direction.setter
+    def direction(self, value):
+        self._direction = value
+        self.rotate_component()
+
+    def rotate_component(self):
+        rotation = self.rotation
+        rotation.y = math.atan2(self.direction[0], self.direction[1]) * 180 / math.pi + 180
+        self.rotation = rotation
+
+class Snake(GenericSnakeComponent):
+    def __init__(self):
+        super().__init__()
+        self.model='assets/snakes/head.obj'
         self.collider = 'box'
-        self.color = color.black
+        self.textureColor = textures[0]
         self.direction = (0, 0)
         self.position = (0, 0.5, 0)
         self.speed = 5                  # speed in units/s
@@ -66,6 +66,8 @@ class Snake(Entity):
         else:
             self.actions.append(Action(self.direction, self.position))
 
+        self.rotate_component()
+
     def update(self):
         self.update_children()
         self.x += self.velocity[0] * time.dt
@@ -80,7 +82,7 @@ class Snake(Entity):
     def update_children(self):
         delay = 0
         for idx, child in enumerate(self.children):
-            delay += self.scale.x / self.speed
+            delay += child.model_bounds.z / self.speed
             for action in self.actions:
                 if(time.time() >= action.time + delay and not idx in action.completed_indices):
                     child.perform_action(action)
@@ -99,14 +101,51 @@ class Snake(Entity):
             last_child = self
         else:
             last_child = self.children[-1]
-        child = SnakeComponent(last_child.direction, self)
+            last_child.tail = False
+
+        child = SnakeBodyComponent(last_child.direction, self, tail = len(self.children) > 0)
         child.position = last_child.position
+
         if(not isinstance(last_child, Snake) and not last_child.is_active):
-            child.activation_time = last_child.activation_time + last_child.scale.x / self.speed
+            child.activation_time = last_child.activation_time + last_child.model_bounds.z / self.speed
         else:
-            child.activation_time = time.time() + last_child.scale.x / self.speed
+            child.activation_time = time.time() + last_child.model_bounds.z / self.speed
         self.children.append(child)
 
     @property
     def length(self):
         return len(self.children)
+
+class SnakeBodyComponent(GenericSnakeComponent):
+    def __init__(self, direction, parent, tail = True, activation_time = time.time()):
+        super().__init__()
+        self.tail = tail
+        self.collider = 'box'
+        self.direction = direction
+        self.activation_time = activation_time
+        self.is_active = False
+        self._parent = parent
+
+    @property
+    def tail(self):
+        return self._tail
+
+    @tail.setter
+    def tail(self, value):
+        if value:
+            self.model = 'assets/snakes/tail.obj'
+        else:
+            self.model='assets/snakes/segment.obj'
+
+    @property
+    def velocity(self):
+        return tuple(d * self._parent.speed for d in self.direction)
+
+    def update(self):
+        if(self.is_active):
+            self.x += self.velocity[0] * time.dt
+            self.z += self.velocity[1] * time.dt
+
+    def perform_action(self, action):
+        self.direction = action.direction
+        self.position = action.position
