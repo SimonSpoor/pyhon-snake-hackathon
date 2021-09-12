@@ -1,21 +1,21 @@
 from ursina import *
-from player import *
+from snake import *
 
 app = Ursina()
 
-ground_size = 25
+ground_size = 3
 ground=Entity(
-    model='quad',
-    color=color.gray,
+    model='assets/grass.obj',
+    texture="assets/grass.jpg",
     scale=(ground_size,ground_size),
     position=(0, 0, 0),
-    rotation=(90, 0, 0)
+    rotation=(0, 0, 0)
 )
 
 camera.position = (0, 60, 28)
 camera.rotation_x = 65
 camera.rotation_y = 180
 
-player = Player()
+player = Snake()
 
 app.run()

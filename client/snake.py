@@ -101,7 +101,7 @@ class Snake(Entity):
             last_child = self.children[-1]
         child = SnakeComponent(last_child.direction, self)
         child.position = last_child.position
-        if(not isinstance(last_child, Player) and not last_child.is_active):
+        if(not isinstance(last_child, Snake) and not last_child.is_active):
             child.activation_time = last_child.activation_time + last_child.scale.x / self.speed
         else:
             child.activation_time = time.time() + last_child.scale.x / self.speed
