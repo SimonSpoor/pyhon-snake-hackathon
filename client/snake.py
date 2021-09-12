@@ -75,9 +75,26 @@ class Snake(GenericSnakeComponent):
         self.check_collisions()
 
     def check_collisions(self):
+        ceiling = Entity(model = 'quad', visible = False, position = (0, 0, 13), collider = 'box')
+        floor = Entity(model = 'quad', visible = False, position = (0, 0, -8), collider = 'box')
+        leftWall = Entity(model = 'quad', visible = False, rotation_x = 90, position = (0, 8, 0), collider = 'box')
+        rightWall = Entity(model = 'quad', visible = False, rotation_x = 90, position = (0, 8, 0), collider = 'box')
         for child in self.children[1:]:
             if(self.intersects(child)).hit:
                 print("Hit")
+        if(self.intersects(ceiling)).hit:
+            print("Hit")
+            destroy(self)
+        if(self.intersects(floor)).hit:
+            print("Hit")
+            destroy(self)
+        if(self.intersects(leftWall)).hit:
+            print("Hit")
+            destroy(self)
+        if(self.intersects(rightWall)).hit:
+            print("Hit")
+            destroy(self)
+        
 
     def update_children(self):
         delay = 0
