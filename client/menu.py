@@ -31,6 +31,8 @@ class Menu():
             rotation=(0, 0, 0)
         )
 
+        print(ground.model_bounds)
+
         camera.position = (0, 60, 0)
         camera.rotation_x = 90
         camera.rotation_y = 180
