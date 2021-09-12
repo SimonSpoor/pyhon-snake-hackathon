@@ -1,4 +1,5 @@
 from ursina import *
+from food import Apple
 import time
 
 textures = [
@@ -15,6 +16,8 @@ textures = [
     'white',
     'yellow'
 ]
+
+food = Apple()
 
 class Action():
     def __init__(self, direction, position):
@@ -50,8 +53,8 @@ class Snake(GenericSnakeComponent):
         self.texture = 'assets/snakes/default/head.png'
         self.collider = 'box'
         self.direction = (0, 0)
-        self.position = (0, 0.5, 0)
-        self.speed = 5                  # speed in units/s
+        self.position = (0, self.model_bounds.y / 2, 0)
+        self.speed = 10                  # speed in units/s
         self.children = []
         self.actions = []
 
@@ -70,9 +73,6 @@ class Snake(GenericSnakeComponent):
         if key == 'd' or key == "right_arrow":
             self.direction = (-1, 0)
 
-        if key == 'space':
-          self.grow_snake()
-
         if(old_direction[0] == -self.direction[0] or old_direction[1] == -self.direction[1] and not old_direction == (0, 0)):
             self.direction = old_direction
         else:
@@ -87,9 +87,30 @@ class Snake(GenericSnakeComponent):
         self.check_collisions()
 
     def check_collisions(self):
+        ceiling = Entity(model = 'quad', visible = False, scale = Vec3(50, 1, 1), position = (0, 0, -12), collider = 'box')
+        floor = Entity(model = 'quad', visible = False, scale = Vec3(50, 1, 1), position = (0, 0, 12), collider = 'box')
+        leftWall = Entity(model = 'quad', visible = False, scale = Vec3(1, 1, 50), position = (-22, 0, 0), collider = 'box')
+        rightWall = Entity(model = 'quad', visible = False, scale = Vec3(1, 1, 50), position = (22, 0, 0), collider = 'box')
         for child in self.children[1:]:
-            if(self.intersects(child)).hit:
+            if (self.intersects(child)).hit and child.is_active:
                 print("Hit")
+                destroy(self)
+                return
+        if(self.intersects(ceiling)).hit:
+            print("Hit")
+            destroy(self)
+        if(self.intersects(floor)).hit:
+            print("Hit")
+            destroy(self)
+        if(self.intersects(leftWall)).hit:
+            print("Hit")
+            destroy(self)
+        if(self.intersects(rightWall)).hit:
+            print("Hit")
+            destroy(self)
+        if(self.intersects(food)).hit:
+            food.relocate_apple()
+            self.grow_snake()
 
     def update_children(self):
         delay = 0
@@ -117,6 +138,7 @@ class Snake(GenericSnakeComponent):
 
         child = SnakeBodyComponent(last_child.direction, self, tail = len(self.children) > 0)
         child.position = last_child.position
+        child.position.y = child.model_bounds.y / 2
 
         if(not isinstance(last_child, Snake) and not last_child.is_active):
             child.activation_time = last_child.activation_time + last_child.model_bounds.z / self.speed
