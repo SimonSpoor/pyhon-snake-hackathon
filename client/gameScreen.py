@@ -1,3 +1,4 @@
+import ursina
 from ursina import *
 from snake import *
 
